@@ -31,11 +31,27 @@ const io = new Server(server, {
   cors: { origin: "*" }
 });
 
+const allowedOrigins = [
+  'http://localhost:3000', 'https://blog-app-seven-sooty-78.vercel.app/'
+];
+
 // Socket.IO
 socketHandler(io);
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use('/uploads', expressStatic(join(__dirname, 'uploads')));
